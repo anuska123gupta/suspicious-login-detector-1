@@ -23,7 +23,6 @@ body {
   padding: 2rem;
 }
 
-/* Header */
 .header {
   display: flex;
   justify-content: space-between;
@@ -33,10 +32,8 @@ body {
   padding-bottom: 1rem;
 }
 
-.header h1 {
-  font-size: 1.8rem;
+h1, h2 {
   color: var(--lightest-slate);
-  margin: 0;
 }
 
 .status-indicator {
@@ -55,13 +52,12 @@ body {
   box-shadow: 0 0 8px var(--accent-color);
 }
 
-/* Dashboard Grid Layout */
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto auto 1fr;
   gap: 1.5rem;
-  height: calc(100vh - 150px); /* Full height minus header */
+  height: calc(100vh - 150px);
 }
 
 .dashboard-card {
@@ -71,7 +67,6 @@ body {
   padding: 1.5rem;
 }
 
-/* Key Metrics Cards */
 .key-metrics-card {
   grid-column: span 12;
   display: grid;
@@ -98,14 +93,12 @@ body {
 
 .metric-item .value {
   font-size: 2.5rem;
-  color: var(--lightest-slate);
   font-weight: 700;
 }
 
-/* Alerts Feed */
 .alerts-feed {
   grid-column: span 12;
-  grid-row: 2;
+  grid-row: 3;
   display: flex;
   flex-direction: column;
 }
@@ -114,11 +107,6 @@ body {
   .alerts-feed {
     grid-column: span 4;
   }
-}
-
-.alerts-feed h2 {
-  margin-top: 0;
-  color: var(--lightest-slate);
 }
 
 .alerts-list {
@@ -162,22 +150,16 @@ body {
 .risk-level.Medium { background-color: rgba(255, 215, 0, 0.2); color: var(--yellow-accent); }
 .risk-level.Low { background-color: rgba(100, 255, 218, 0.2); color: var(--accent-color); }
 
-/* Alert Details */
 .alert-details {
   grid-column: span 12;
-  grid-row: 3;
+  grid-row: 4;
 }
 
 @media (min-width: 1024px) {
   .alert-details {
     grid-column: span 8;
-    grid-row: 2;
+    grid-row: 3;
   }
-}
-
-.alert-details h2 {
-  margin-top: 0;
-  color: var(--lightest-slate);
 }
 
 .detail-grid {
@@ -197,7 +179,6 @@ body {
   margin-bottom: 0.2rem;
 }
 
-/* Scrollbar styling */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--dark-navy); }
 ::-webkit-scrollbar-thumb { background: var(--lightest-navy); border-radius: 4px; }

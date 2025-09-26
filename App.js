@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import AlertsChart from './AlertsChart';
 
-// --- MOCK DATA ---
 const initialAlerts = [
   {
     id: 'a1',
     ip: '81.2.69.142',
-    timestamp: '2025-09-25T23:40:15Z',
+    timestamp: '2025-09-26T03:10:15Z',
     country: 'United Kingdom',
     city: 'London',
     device: 'Desktop',
@@ -17,37 +17,9 @@ const initialAlerts = [
     reason: 'Login from a known malicious IP address and unusual location for this user.'
   },
   {
-    id: 'a2',
-    ip: '103.27.132.190',
-    timestamp: '2025-09-25T23:39:55Z',
-    country: 'India',
-    city: 'Mumbai',
-    device: 'Mobile',
-    os: 'Android 13',
-    browser: 'Firefox 112',
-    rtt: 85,
-    riskLevel: 'Medium',
-    isAttack: false,
-    reason: 'Successful login but with a significantly higher RTT than usual for this region.'
-  },
-  {
-    id: 'a3',
-    ip: '197.210.65.112',
-    timestamp: '2025-09-25T23:39:21Z',
-    country: 'Nigeria',
-    city: 'Lagos',
-    device: 'Desktop',
-    os: 'Linux',
-    browser: 'Chrome 114',
-    rtt: 250,
-    riskLevel: 'High',
-    isAttack: true,
-    reason: 'Impossible travel scenario. User logged in from Norway 20 minutes prior.'
-  },
-    {
     id: 'a4',
     ip: '47.91.68.231',
-    timestamp: '2025-09-25T23:38:40Z',
+    timestamp: '2025-09-26T03:08:40Z',
     country: 'Norway',
     city: 'Oslo',
     device: 'Desktop',
@@ -60,8 +32,6 @@ const initialAlerts = [
   }
 ];
 
-// --- COMPONENTS (These are unchanged) ---
-
 const Header = () => (
   <header className="header">
     <h1>Cyberattack Detection System</h1>
@@ -73,7 +43,7 @@ const Header = () => (
 );
 
 const KeyMetrics = ({ alerts }) => {
-  const totalLogins = 53201 + alerts.length - initialAlerts.length; // Now dynamic!
+  const totalLogins = 53201 + alerts.length - initialAlerts.length;
   const suspiciousCount = alerts.filter(a => a.riskLevel !== 'Low').length;
   const accountsAtRisk = alerts.filter(a => a.isAttack).length;
 
@@ -146,42 +116,59 @@ const AlertDetails = ({ alert }) => {
   );
 };
 
-
-// --- MAIN APP ---
 function App() {
   const [alerts, setAlerts] = useState(initialAlerts);
   const [selectedAlert, setSelectedAlert] = useState(null);
-  
-  // --- NEW: Simulate real-time data arriving every 5 seconds ---
+  const [chartData, setChartData] = useState([]);
+
+  // THIS useEffect IS NOW CORRECTLY INSIDE THE APP FUNCTION
   useEffect(() => {
     const interval = setInterval(() => {
-      // Create a new mock alert
-      const newAlert = {
-        id: `a${Date.now()}`, // Unique ID based on timestamp
-        ip: '203.0.113.25',
-        timestamp: new Date().toISOString(),
-        country: 'Japan',
-        city: 'Tokyo',
-        device: 'Mobile',
-        os: 'iOS 17',
-        browser: 'Safari 17.0',
-        rtt: 150,
-        riskLevel: 'Medium',
-        isAttack: false,
-        reason: 'Suspicious login from a new device for this user account.'
-      };
-
-      // Add the new alert to the top of the list
-      // This uses the 'setAlerts' function we talked about!
-      setAlerts(currentAlerts => [newAlert, ...currentAlerts]);
-
-    }, 5000); // 5000 milliseconds = 5 seconds
-
-    // Cleanup the interval when the component unmounts to prevent memory leaks
+      const alertCount = Math.floor(Math.random() * 4) + 1;
+      const newAlerts = [];
+      for (let i = 0; i < alertCount; i++) {
+        newAlerts.push({
+          id: `a${Date.now() + i}`,
+          ip: '203.0.113.' + Math.floor(Math.random() * 255),
+          timestamp: new Date().toISOString(),
+          country: 'Japan',
+          city: 'Tokyo',
+          device: 'Mobile',
+          os: 'iOS 17',
+          browser: 'Safari 17.0',
+          rtt: 150 + Math.floor(Math.random() * 50),
+          riskLevel: 'Medium',
+          isAttack: false,
+          reason: 'Suspicious login from a new device for this user account.'
+        });
+      }
+      setAlerts(currentAlerts => [...newAlerts, ...currentAlerts]);
+    }, 5000); 
     return () => clearInterval(interval);
-  }, []); // The empty array [] means this effect runs only once when the app starts
+  }, []); 
 
-  // On first load, select the highest priority alert
+  // THIS useEffect IS ALSO CORRECTLY INSIDE THE APP FUNCTION
+  useEffect(() => {
+    const processDataForChart = () => {
+      const now = Date.now();
+      const fiveMinutesAgo = now - 5 * 60 * 1000;
+      const recentAlerts = alerts.filter(a => new Date(a.timestamp).getTime() > fiveMinutesAgo);
+      const groupedData = recentAlerts.reduce((acc, alert) => {
+        const alertTime = new Date(alert.timestamp);
+        const timeKey = `${alertTime.getHours()}:${alertTime.getMinutes()}:${String(alertTime.getSeconds()).padStart(2,'0')}`;
+        if (!acc[timeKey]) {
+          acc[timeKey] = { time: timeKey, alerts: 0 };
+        }
+        acc[timeKey].alerts++;
+        return acc;
+      }, {});
+      const sortedChartData = Object.values(groupedData).sort((a, b) => a.time.localeCompare(b.time));
+      setChartData(sortedChartData);
+    };
+    processDataForChart();
+  }, [alerts]);
+
+  // THIS useEffect IS ALSO CORRECTLY INSIDE THE APP FUNCTION
   useEffect(() => {
     if (!selectedAlert && alerts.length > 0) {
       const highPriorityAlert = alerts.find(a => a.riskLevel === 'High');
@@ -196,6 +183,11 @@ function App() {
       <div className="dashboard-grid">
         <div className="key-metrics-card" style={{ gridColumn: 'span 12' }}>
           <KeyMetrics alerts={alerts} />
+        </div>
+        
+        <div className="dashboard-card" style={{ gridColumn: 'span 12', gridRow: '2', minHeight: '300px' }}>
+            <h2 style={{marginTop: 0}}>Alerts Over Time</h2>
+            <AlertsChart data={chartData} />
         </div>
         
         <AlertsFeed 
